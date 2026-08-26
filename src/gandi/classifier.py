@@ -110,7 +110,7 @@ class SkaniJob:
         self.ani : pl.DataFrame = None
         # mag mode
         self.mag_mode = mag_mode
-        if self.multifasta_individual_sequences is True:
+        if multifasta_individual_sequences is True:
             self.mag_mode = False
 
     def run(self):
