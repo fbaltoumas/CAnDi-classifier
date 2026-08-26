@@ -293,7 +293,9 @@ class DiamondJob:
             "--query-cover",
             "50",
             "--subject-cover",
-            "50"
+            "50",
+            "--threads",
+            str(self.cpus)
         ]
         try:
             sp.run(cmd, check=True, capture_output=True, text=True)
