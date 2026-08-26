@@ -95,6 +95,7 @@ class SkaniJob:
                  output_prefix: Path,
                  database: Path,
                  multifasta_individual_sequences: bool = False,
+                 mag_mode: bool = False,
                  cpus: int = 1, skani_exe: str = None) -> None:
         self.input_file = input_file
         self.output_prefix = output_prefix
@@ -107,6 +108,10 @@ class SkaniJob:
         self.skani_exe = skani_exe
         # processed output:
         self.ani : pl.DataFrame = None
+        # mag mode
+        self.mag_mode = mag_mode
+        if self.multifasta_individual_sequences is True:
+            self.mag_mode = False
 
     def run(self):
         q_arg = "-q"
@@ -157,6 +162,11 @@ class SkaniJob:
         if proc_output.height == 0:
             logger.warning("Skani found no hits for the input sequence(s); ANI result will be empty.")
         proc_output = proc_output.sort(['ani', 'qcov', 'tcov'], descending=[True, True, True], nulls_last=True)
+        # if mag mode is true, split contig names by "__" to get tghe mag prefix
+        if self.mag_mode is True:
+            if proc_output.height > 0:
+                proc_output = proc_output.with_columns(pl.col("query").str.split("__").list.get(0))
+                proc_output = proc_output.with_columns(pl.col("seq_name").str.split("__").list.get(0))
         self.ani = proc_output
 
 
@@ -310,7 +320,7 @@ class GenomeAAICalculator:
     }
 
     def __init__(self,
-                 diamond_output_file: Path) -> None:
+                 diamond_output_file: Path, mag_mode: bool = False) -> None:
         diamond_output_file = Path(diamond_output_file)
         if diamond_output_file.stat().st_size == 0:
             # diamond found no hits at all, so it wrote an empty file. Use an empty,
@@ -323,13 +333,20 @@ class GenomeAAICalculator:
                 str(diamond_output_file), separator="\t", has_header=False, infer_schema_length=None,
                 new_columns=list(self._DIAMOND_SCHEMA.keys())
             )
+        self.mag_mode = mag_mode
         self.aai_result = None
 
     def calculate_aai(self, pid_cutoff: float = 30.0):
-        diamond_result = self.diamond_result.with_columns([
-            pl.col('query').str.replace(r'_[^_]*$', '').alias('query_genome'),
-            pl.col('hit').str.replace(r'_[^_]*$', '').alias('hit_genome'),
-        ])
+        if self.mag_mode is True:
+            diamond_result = self.diamond_result.with_columns([
+                pl.col('query').str.replace(r'__[^_]*$', '').alias('query_genome'),
+                pl.col('hit').str.replace(r'__[^_]*$', '').alias('hit_genome'),
+            ])
+        else:
+            diamond_result = self.diamond_result.with_columns([
+                pl.col('query').str.replace(r'_[^_]*$', '').alias('query_genome'),
+                pl.col('hit').str.replace(r'_[^_]*$', '').alias('hit_genome'),
+            ])
 
         # sort table by bitscore and evalue first
         diamond_result_sorted = diamond_result.sort(['bit_score', 'evalue'], descending=[True, False], nulls_last=True)
@@ -464,8 +481,11 @@ def main(argv=None, prog=None):
     # step 2. Define database
     logger.info("=== Step 2: Loading the reference database ===")
     database = Database(args.category, args.database)
+    # 2.1. If args.category == mags, mag_mode set to true 
+    mag_mode = False
+    if args.category.lower() == "mags":
+        mag_mode = True
     logger.info(f"Using '{database.database_type}' database at {database.database_root}")
-
 
     # set workflow
     workflow = args.workflow.lower()
@@ -485,6 +505,7 @@ def main(argv=None, prog=None):
             output_prefix_raw,
             skani_db,
             skani_multifasta,
+            mag_mode,
             cpus,
             skani_exe
         )
@@ -547,7 +568,8 @@ def main(argv=None, prog=None):
         # step 3. calculate AAI
         logger.info("Calculating AAI...")
         aai_calculator = GenomeAAICalculator(
-            f"{output_path}/diamond-search.blout"
+            f"{output_path}/diamond-search.blout",
+            mag_mode
         )
         aai_calculator.calculate_aai()
         aai_calculator.aai_result.write_csv(f"{output_path}/AAI-result.tsv", separator="\t")
