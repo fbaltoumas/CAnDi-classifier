@@ -339,8 +339,8 @@ class GenomeAAICalculator:
     def calculate_aai(self, pid_cutoff: float = 30.0):
         if self.mag_mode is True:
             diamond_result = self.diamond_result.with_columns([
-                pl.col('query').str.replace(r'__[^_]*$', '').alias('query_genome'),
-                pl.col('hit').str.replace(r'__[^_]*$', '').alias('hit_genome'),
+                pl.col('query').str.split("__").list.get(0).alias('query_genome'),
+                pl.col('hit').str.split("__").list.get(0).alias('hit_genome'),
             ])
         else:
             diamond_result = self.diamond_result.with_columns([
