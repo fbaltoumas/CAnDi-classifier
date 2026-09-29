@@ -46,10 +46,10 @@ ENV CXX=g++
 ENV TMPDIR=/opt/build-tmp
 RUN mkdir -p "$TMPDIR"
 
-RUN git clone --depth 1 https://github.com/fbaltoumas/GanDi-classifier.git /opt/GanDi-classifier \
-    && python3 /opt/GanDi-classifier/scripts/check_cpu_baseline.py \
-    && pip install --no-cache-dir /opt/GanDi-classifier \
-    && rm -rf /opt/GanDi-classifier "$TMPDIR"
+RUN git clone --depth 1 https://github.com/fbaltoumas/CAnDi-classifier.git /opt/CAnDi-classifier \
+    && python3 /opt/CAnDi-classifier/scripts/check_cpu_baseline.py \
+    && pip install --no-cache-dir /opt/CAnDi-classifier \
+    && rm -rf /opt/CAnDi-classifier "$TMPDIR"
 
 WORKDIR /data
 

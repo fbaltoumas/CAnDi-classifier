@@ -1,5 +1,6 @@
-# GanDi-classifier
-Contig classifier for the Global Anaerobic Digestion (GanDi) database
+# CAnDi-classifier
+Contig classifier for the Compendium Of Anaerobic Digestion Microbiomes Database (CAnDi)
+
 
 ## Table of Contents
 
@@ -68,14 +69,14 @@ conda install -c bioconda -c conda-forge skani prodigal prodigal-gv diamond
 The package isn't published on PyPI yet, so install it from a git clone:
 
 ```bash
-git clone https://github.com/fbaltoumas/GanDi-classifier.git
-cd GanDi-classifier
+git clone https://github.com/fbaltoumas/CAnDi-classifier.git
+cd CAnDi-classifier
 pip install .
 ```
 
 This also installs the Python packages listed in [Dependencies](#python-packages).
 
-**Note**: For an editable install (picks up code changes without reinstalling), use `pip install -e .` instead. 
+**Note**: For an editable install (picks up code changes without reinstalling), use `pip install -e .` instead.
 
 ### Windows users
 
