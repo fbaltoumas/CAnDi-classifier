@@ -1,6 +1,7 @@
 # CAnDi-classifier
 Contig classifier for the Compendium Of Anaerobic Digestion Microbiomes Database (CAnDi)
 
+> This project (and its `gandi` command) was renamed to `candi`. The command-line tool is now `candi`, but `gandi` is still installed as an alias and behaves identically — every example below works the same with either name.
 
 ## Table of Contents
 
@@ -10,7 +11,7 @@ Contig classifier for the Compendium Of Anaerobic Digestion Microbiomes Database
 - [Installation](#installation)
   - [a) Create a conda environment](#a-create-a-conda-environment)
   - [b) Install the external dependencies through conda](#b-install-the-external-dependencies-through-conda)
-  - [c) Install the `gandi` package](#c-install-the-gandi-package)
+  - [c) Install the `candi` package](#c-install-the-candi-package)
   - [Windows users](#windows-users)
   - [Docker](#docker)
 - [Usage](#usage)
@@ -25,17 +26,17 @@ Contig classifier for the Compendium Of Anaerobic Digestion Microbiomes Database
 
 ## Dependencies
 
-`gandi` requires **Python 3.11+**.
+`candi` requires **Python 3.11+**.
 
 ### External executables
 
-`gandi classifier` shells out to `skani`, `prodigal`/`prodigal-gv`, and `diamond`; `gandi download-db` shells out to `skani` and `diamond`. These are not Python packages and are not installed automatically — they need to be installed separately and be available on `PATH`. See[Installation](#installation) for how to install them via conda. Alternatively, visit each dependency's repository, to view its installation instructions.
+`candi classifier` shells out to `skani`, `prodigal`/`prodigal-gv`, and `diamond`; `candi download-db` shells out to `skani` and `diamond`. These are not Python packages and are not installed automatically — they need to be installed separately and be available on `PATH`. See[Installation](#installation) for how to install them via conda. Alternatively, visit each dependency's repository, to view its installation instructions.
 
 - **[skani](https://github.com/bluenote-1215/skani)** (ANI workflow)
 
 - **[prodigal](https://github.com/hyattpd/Prodigal)** (AAI workflow)
 
-- **[prodigal-gv](https://github.com/apcamargo/prodigal-gv)** (AAI workflow, used automatically by `gandi classifier` when `-c viruses` is given)
+- **[prodigal-gv](https://github.com/apcamargo/prodigal-gv)** (AAI workflow, used automatically by `candi classifier` when `-c viruses` is given)
 
 - **[diamond](https://github.com/bbuchfink/diamond)** (AAI workflow)
 
@@ -54,8 +55,8 @@ These are installed automatically by `pip install .` — no separate step is nee
 ### a) Create a conda environment
 
 ```bash
-conda create -n gandi python=3.11
-conda activate gandi
+conda create -n candi python=3.11
+conda activate candi
 ```
 
 ### b) Install the external dependencies through conda
@@ -64,9 +65,9 @@ conda activate gandi
 conda install -c bioconda -c conda-forge skani prodigal prodigal-gv diamond
 ```
 
-### c) Install the `gandi` package
+### c) Install the `candi` package
 
-The package isn't published on PyPI yet, so install it from a git clone:
+The package isn't published on PyPI yet, so install it from a git clone. Installing it provides both the `candi` and `gandi` commands:
 
 ```bash
 git clone https://github.com/fbaltoumas/CAnDi-classifier.git
@@ -80,73 +81,78 @@ This also installs the Python packages listed in [Dependencies](#python-packages
 
 ### Windows users
 
-`gandi` and its dependencies (`skani`, `prodigal`, `prodigal-gv`, `diamond`) are not supported natively on Windows — `bioconda`, which provides these tools, only supports Linux and macOS. To run this tool on Windows:
+`candi` and its dependencies (`skani`, `prodigal`, `prodigal-gv`, `diamond`) are not supported natively on Windows — `bioconda`, which provides these tools, only supports Linux and macOS. To run this tool on Windows:
 
 1. Install and configure the Windows Subsystem for Linux (WSL). See the [official Microsoft WSL installation guide](https://learn.microsoft.com/en-us/windows/wsl/install).
 2. Once inside your WSL Linux environment, proceed as normal — follow the steps above exactly as you would on native Linux.
 
 ### Docker
 
-A `Dockerfile` is provided that bundles `gandi` together with all of its external dependencies (`skani`, `prodigal`, `prodigal-gv`, `diamond`) via bioconda, so no separate dependency installation is needed.
+A `Dockerfile` is provided that bundles `candi` together with all of its external dependencies (`skani`, `prodigal`, `prodigal-gv`, `diamond`) via bioconda, so no separate dependency installation is needed.
 
 Build the image:
 
 ```bash
-docker build -t gandi .
+docker build -t candi .
 ```
 
 Run it (mount a local directory to `/data` so input/output/database files are accessible from the host). First download the reference database, then classify a genome against it:
 
 ```bash
-docker run --rm -v "$(pwd)":/data gandi download-db -o /data/gandi_db
+docker run --rm -v "$(pwd)":/data candi download-db -o /data/candi_db
 
-docker run --rm -v "$(pwd)":/data gandi classifier \
+docker run --rm -v "$(pwd)":/data candi classifier \
     -i /data/input.fasta -o /data/output_dir -w full \
-    -c plasmids -d /data/gandi_db
+    -c plasmids -d /data/candi_db
 ```
 
-Running the image with no arguments shows the top-level help text listing both subcommands (`docker run --rm gandi`).
+Running the image with no arguments shows the top-level help text listing both subcommands (`docker run --rm candi`).
 
-Note: the `Dockerfile` currently installs the `gandi` package via `git clone` + `pip install .` from source, since the package isn't published on PyPI yet. Once it is, the corresponding `RUN` step can be swapped for a plain `pip install gandi`.
+The image's `ENTRYPOINT` is `candi`; the `gandi` alias is still installed inside the image too, and can be reached with `docker run --rm --entrypoint gandi candi ...` if needed.
+
+Note: the `Dockerfile` currently installs the package via `git clone` + `pip install .` from source, since it isn't published on PyPI yet. Once it is, the corresponding `RUN` step can be swapped for a plain `pip install candi`.
 
 ## Usage
 
 ### Overview
 
-`gandi` is a single command with two subcommands:
+`candi` is a single command with two subcommands (the `gandi` alias behaves identically — see the note at the top of this README):
 
-- `gandi classifier` — classifies contigs/genomes against a GanDi reference database (ANI/AAI workflows).
-- `gandi download-db` — downloads and builds the GanDi reference database.
+- `candi classifier` — classifies contigs/genomes against a CAnDi reference database (ANI/AAI workflows).
+- `candi download-db` — downloads and builds the CAnDi reference database.
 
 ```
-$ gandi -h
-usage: gandi [-h] <subcommand> ...
+$ candi -h
+usage: candi [-h] [-v] <subcommand> ...
 
-gandi: contig/genome classifier and reference-database downloader for the
-Global Anaerobic Digestion (GanDi) database.
+candi 1.0.0: contig/genome classifier and reference-database downloader for the
+Compendium Of Anaerobic Digestion Microbiomes Database (CAnDi).
 
 Classify a genome against the database:
-  gandi classifier -i genome.fasta -o output_dir -c plasmids -d /path/to/database
+  candi classifier -i genome.fasta -o output_dir -c plasmids -d /path/to/database
 
 Download and build the reference database:
-  gandi download-db -o /path/to/database
+  candi download-db -o /path/to/database
 
 positional arguments:
   <subcommand>
-    classifier   Classify contigs/genomes against a GanDi reference database
+    classifier   Classify contigs/genomes against a CAnDi reference database
                  (ANI/AAI workflows).
-    download-db  Download and build the GanDi reference database.
+    download-db  Download and build the CAnDi reference database.
 
 options:
   -h, --help     show this help message and exit
+  -v, --version  show program's version number and exit
 ```
+
+Running `gandi -h` instead shows the exact same text with `gandi` in place of `candi` throughout.
 
 ### Database download
 
 Download and build the reference database (only needs to be done once):
 
 ```bash
-gandi download-db -o /path/to/database
+candi download-db -o /path/to/database
 ```
 
 This requires `skani` and `diamond` to already be on `PATH` (see [Installation](#installation)).
@@ -156,11 +162,11 @@ This requires `skani` and `diamond` to already be on `PATH` (see [Installation](
 Classify a genome or set of contigs against the database:
 
 ```bash
-gandi classifier -i input.fasta -o output_dir -w full \
+candi classifier -i input.fasta -o output_dir -w full \
     -c plasmids -d /path/to/database
 ```
 
-Run `gandi --help` for an overview of both subcommands, or `gandi classifier --help` / `gandi download-db --help` for their full lists of options.
+Run `candi --help` for an overview of both subcommands, or `candi classifier --help` / `candi download-db --help` for their full lists of options.
 
 ### Examples
 
@@ -169,38 +175,38 @@ The `examples/` directory contains sample inputs for each category and workflow.
 MAG input, once per workflow type:
 
 ```bash
-gandi classifier -i examples/mag_input.fna -o mag_full_output -c mags -d /path/to/database -w full
-gandi classifier -i examples/mag_input.fna -o mag_ani_output -c mags -d /path/to/database -w ani
-gandi classifier -i examples/mag_input.fna -o mag_aai_output -c mags -d /path/to/database -w aai
+candi classifier -i examples/mag_input.fna -o mag_full_output -c mags -d /path/to/database -w full
+candi classifier -i examples/mag_input.fna -o mag_ani_output -c mags -d /path/to/database -w ani
+candi classifier -i examples/mag_input.fna -o mag_aai_output -c mags -d /path/to/database -w aai
 ```
 
 Isolate genome, against the MAGs database:
 
 ```bash
-gandi classifier -i examples/isolate_genome_input.fna -o isolate_output -c mags -d /path/to/database
+candi classifier -i examples/isolate_genome_input.fna -o isolate_output -c mags -d /path/to/database
 ```
 
 Single virus genome:
 
 ```bash
-gandi classifier -i examples/single_virus.fna -o single_virus_output -c viruses -d /path/to/database
+candi classifier -i examples/single_virus.fna -o single_virus_output -c viruses -d /path/to/database
 ```
 
 Multiple virus genomes in one FASTA file, using `--multiple_genomes` so each sequence is treated as a separate genome:
 
 ```bash
-gandi classifier -i examples/multiple_viruses.fna -o multiple_viruses_output -c viruses -d /path/to/database --multiple_genomes
+candi classifier -i examples/multiple_viruses.fna -o multiple_viruses_output -c viruses -d /path/to/database --multiple_genomes
 ```
 
 Single plasmid:
 
 ```bash
-gandi classifier -i examples/single_plasmid.fna -o single_plasmid_output -c plasmids -d /path/to/database
+candi classifier -i examples/single_plasmid.fna -o single_plasmid_output -c plasmids -d /path/to/database
 ```
 
 ### Output structure
 
-`gandi classifier` writes all of its output into the directory given with `-o`. Which files appear depends on the workflow (`-w`) used, since the `ani`/`aai`-specific files are only produced by their respective workflow.
+`candi classifier` writes all of its output into the directory given with `-o`. Which files appear depends on the workflow (`-w`) used, since the `ani`/`aai`-specific files are only produced by their respective workflow.
 
 **Main output files**
 
@@ -215,13 +221,13 @@ gandi classifier -i examples/single_plasmid.fna -o single_plasmid_output -c plas
 - `skani_search.skani` — the raw, unprocessed output of the `skani search` command. Written by the `ani` and `full` workflows.
 - `prodigal.gff`, `prodigal.fna`, `prodigal.faa` — the gene/protein predictions from `prodigal`/`prodigal-gv` used to build the AAI workflow's query proteome. Written by the `aai` and `full` workflows.
 - `diamond-search.blout` — the raw `diamond blastp` hits used to calculate AAI. Written by the `aai` and `full` workflows.
-- A copy of the input FASTA file is also placed in the output directory, as the working copy `gandi classifier` actually ran against.
+- A copy of the input FASTA file is also placed in the output directory, as the working copy `candi classifier` actually ran against.
 
 ## Troubleshooting
 
 ### `RuntimeError: NumPy was built with baseline optimizations... but your machine doesn't support...`
 
-This means the CPU numpy is running on is missing instructions (SSSE3/SSE4.1/SSE4.2/POPCNT) that numpy's official PyPI wheels require. This is not a bug in `gandi` — it's most commonly seen on virtual machines where the hypervisor masks CPU features from the guest for live-migration compatibility (e.g. Hyper-V's "Processor Compatibility Mode"), even though the physical CPU fully supports them.
+This means the CPU numpy is running on is missing instructions (SSSE3/SSE4.1/SSE4.2/POPCNT) that numpy's official PyPI wheels require. This is not a bug in `candi` — it's most commonly seen on virtual machines where the hypervisor masks CPU features from the guest for live-migration compatibility (e.g. Hyper-V's "Processor Compatibility Mode"), even though the physical CPU fully supports them.
 
 Fixes, in order of preference:
 
@@ -231,9 +237,9 @@ Fixes, in order of preference:
    ```bash
    python3 scripts/check_cpu_baseline.py
    ```
-   Run it before `pip install .` on a fresh setup, or afterwards to repair an already-broken install (no need to reinstall the `gandi` package itself afterwards — just re-run `gandi`).
+   Run it before `pip install .` on a fresh setup, or afterwards to repair an already-broken install (no need to reinstall the package itself afterwards — just re-run `candi`).
 
-   If you don't have the repo cloned (e.g. installed via `pip install gandi`), run the equivalent command directly instead:
+   If you don't have the repo cloned (e.g. installed via `pip install candi`), run the equivalent command directly instead:
    ```bash
    pip install --force-reinstall numpy --no-binary numpy -Csetup-args=-Dcpu-baseline="none"
    ```
@@ -243,7 +249,7 @@ Fixes, in order of preference:
 
 Same root cause as above (a CPU/VM missing instructions polars' default build requires — in this case a wider set, including AVX/AVX2/FMA/BMI), but a different failure mode: polars crashes the whole process outright (`SIGILL`) rather than raising a catchable Python exception, so this can't be turned into a friendly error message — it has to be fixed at the install level.
 
-`gandi` already depends on `polars[rtcompat]` rather than plain `polars`, which installs an extra, broadly-compatible runtime (`polars-runtime-compat`) alongside the normal fast one; polars picks whichever one actually matches the CPU it's running on at import time, automatically and with no performance cost on capable CPUs. If you still hit this (e.g. an existing environment installed before this was added, or a version of `gandi` predating it), fix it directly:
+`candi` already depends on `polars[rtcompat]` rather than plain `polars`, which installs an extra, broadly-compatible runtime (`polars-runtime-compat`) alongside the normal fast one; polars picks whichever one actually matches the CPU it's running on at import time, automatically and with no performance cost on capable CPUs. If you still hit this (e.g. an existing environment installed before this was added, or a version predating it), fix it directly:
 ```bash
 pip install --force-reinstall "polars[rtcompat]"
 ```

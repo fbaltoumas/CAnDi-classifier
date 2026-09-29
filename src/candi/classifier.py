@@ -46,13 +46,14 @@ def get_exe_location(exe_name: str) -> str:
 
 
 def cmd_arguments(argv=None, prog=None):
-    parser = ap.ArgumentParser(prog=prog, description=f"gandi classifier {__version__}")
-    parser.add_argument("-v", "--version", action="version", version=f"gandi classifier {__version__}")
+    parser = ap.ArgumentParser(prog=prog)
+    parser.description = f"{parser.prog} {__version__}"
+    parser.add_argument("-v", "--version", action="version", version=f"{parser.prog} {__version__}")
     general = parser.add_argument_group("Input/output and run type options")
     general.add_argument("-i", "--input", required=True, type=str, help="Input genome(s) file in FASTA format.")
     general.add_argument("-o", "--output", required=True, type=str, help="Output prefix")
     general.add_argument("-c", "--category", required=True, type=str, help="Data category to search. Must be one of these three: viruses, plasmids, or mags")
-    general.add_argument("-d", "--database", required=True, type=str, help="Path to the GanDi-classifier database, e.g. '~/gandi/database/'")
+    general.add_argument("-d", "--database", required=True, type=str, help="Path to the CAnDi-classifier database, e.g. '~/candi/database/'")
     general.add_argument("-w", "--workflow", required=False, type=str, default="full", help="Workflow type. Can be one of 'ani' (genome-based), 'aai' (proteome-based), or 'full' (both). Default is 'full'")
     general.add_argument("-m", "--multiple_genomes", action='store_true', required=False, help='If set, treat each sequence in the input FASTA as a separate genome.  Enables "--qi" option in skani and "-p meta" in prodigal')
     general.add_argument("-t", "--threads", required=False, default=1, type=int, help="Number of CPU threads to use. Default: 1. Use 0 to get all CPU threads")

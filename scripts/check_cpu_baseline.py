@@ -14,9 +14,9 @@ https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/configur
 Usage:
     python3 scripts/check_cpu_baseline.py
 
-Run this before `pip install .` / `pip install gandi` on a fresh setup, or
+Run this before `pip install .` / `pip install candi` on a fresh setup, or
 afterwards to repair an already-broken install (no need to reinstall the
-`gandi` package itself afterwards).
+`candi` package itself afterwards).
 """
 import platform
 import subprocess
