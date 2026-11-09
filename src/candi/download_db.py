@@ -18,7 +18,7 @@ from . import __version__
 logger = logging.getLogger(__name__)
 
 
-URL = "https://www.gandi-db.org/datasets/gandi-classifier-db.tar.gz"
+URL = "https://www.candi-db.org/datasets/classifier-db.tar.gz"
 
 
 class DatabaseDownloader:
